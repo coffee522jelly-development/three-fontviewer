@@ -1,3 +1,3 @@
-# Three-Viewer
+# Three-font-Viewer
 
-- This application is to plactice WebGL powered by three.js. 
+- このアプリはThree.jsで文字を読み込みます。
