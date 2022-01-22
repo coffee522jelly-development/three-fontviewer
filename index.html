@@ -85,12 +85,13 @@
         wireline.add(linew);
 
         var loader = new THREE.FontLoader();
-        loader.load( 'fonts/helvetiker_regular.typeface.js', function ( font ) 
+        // loader.load( 'fonts/helvetiker_regular.typeface.js', function ( font ) 
+        loader.load( 'fonts/KosugiMaru.js', function ( font ) 
         {
             let textgroup = new THREE.Group();
 
             // Item1
-            let textGeo1 = new THREE.TextGeometry( "AM 10:23", {
+            let textGeo1 = new THREE.TextGeometry( "吾輩は猫である", {
                 font: font,
                 size: 100,
                 height: 75,
@@ -109,7 +110,7 @@
             textgroup.add(mText1);
 
             // Item2
-            let textGeo2 = new THREE.TextGeometry( "Alarm: AM 7:00", {
+            let textGeo2 = new THREE.TextGeometry( "I don't have a name yet.", {
                 font: font,
                 size: 50,
                 height: 20,
