@@ -1,0 +1,187 @@
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="js/controls/OrbitControls.js"></script>
+    <script src="js/stat/stat.js"></script>
+    <script src="js/script.js"></script>
+    <link rel="stylesheet" href="css/style.css">
+    <script>
+      // ページの読み込みを待つ
+      window.addEventListener('load', init);
+
+      // 画面幅はグローバル
+      const width = window.innerWidth;
+      const height = window.innerHeight;
+
+      function init() {
+        /// FPSを画面右下に表示する
+        var stats = new Stats();
+        stats.showPanel(0);
+        Object.assign(stats.dom.style, {
+          'position': 'fixed',
+          'height': 'max-content',
+          'left': 'auto',
+          'right': 0,
+          'top': 'auto',
+          'bottom': '0'
+        });
+        document.body.appendChild( stats.dom );
+/////////////////////////////////////////////////////////////////////////////////
+        // レンダラーを作成
+        const canvasElement = document.querySelector('#myCanvas');
+        const renderer = new THREE.WebGLRenderer({canvas: canvasElement});
+        renderer.setPixelRatio(window.devicePixelRatio);
+        renderer.setSize(width, height);
+
+        // シーンを作成
+        const scene = new THREE.Scene();
+        scene.background = new THREE.Color( 0x21b12 );
+
+        // 3way lighting
+        const threewaylight = new THREE.Group();
+        const lightX = new THREE.DirectionalLight(0xFFFFFF, 0.8);
+        const lightY = new THREE.DirectionalLight(0xFFFFFF, 0.7);
+        const lightZ = new THREE.DirectionalLight(0xFFFFFF, 0.5);
+        lightX.position.x = 1000;
+        lightY.position.y = 1000;
+        lightZ.position.z = 1000;
+        threewaylight.add(lightX);
+        threewaylight.add(lightY);
+        threewaylight.add(lightZ);
+
+        scene.add(threewaylight);
+
+        // // フォグを設定
+        // scene.fog = new THREE.Fog(0xff, 0, 0);
+
+        // カメラを作成
+        const camera = new THREE.PerspectiveCamera(45, width / height);
+        camera.position.set(500, -300, 1500);
+
+        // マウスコントロールの設定
+        const controls = new THREE.OrbitControls(camera, canvasElement);
+
+        // グリッド作成
+        const plane = new THREE.GridHelper(10000);
+        scene.add(plane);
+
+        const plane2 = new THREE.AxesHelper(10000);
+        scene.add(plane2);
+/////////////////////////////////////////////////////////////////////////////////
+        // 形状とマテリアルからメッシュを作成します
+         const wireline = new THREE.Group();
+         scene.add(wireline);
+
+        const geometry = new THREE.BoxGeometry(1500, 500, 300);
+        //const mesh = new THREE.Mesh(geometry, new THREE.MeshBasicMaterial({color: 0xb0c4de}));
+        const wireframe = new THREE.WireframeGeometry(geometry);
+        const linew = new THREE.LineSegments(wireframe);
+            
+        //mesh.position.set(0, 0, 0);
+        linew.position.set(0, 0, 0);
+
+        //wireline.add(mesh);
+        wireline.add(linew);
+
+        var loader = new THREE.FontLoader();
+        loader.load( 'fonts/helvetiker_regular.typeface.js', function ( font ) 
+        {
+            let textgroup = new THREE.Group();
+
+            // Item1
+            let textGeo1 = new THREE.TextGeometry( "AM 10:23", {
+                font: font,
+                size: 100,
+                height: 75,
+                curveSegments: 1,
+                bevelSize: 1,
+                bevelEnabled: false,
+            } );
+
+            const wireframe1 = new THREE.WireframeGeometry( textGeo1 );
+
+            textGeo1.center();
+            
+            let textMaterialHeader1 = new THREE.MeshPhongMaterial( { color: 0xffffff } );
+            let mText1 = new THREE.Line( textGeo1, textMaterialHeader1 );
+            mText1.position.set( 0, 100, 0 );
+            textgroup.add(mText1);
+
+            // Item2
+            let textGeo2 = new THREE.TextGeometry( "Alarm: AM 7:00", {
+                font: font,
+                size: 50,
+                height: 20,
+                curveSegments: 1,
+                bevelSize: 1,
+                bevelEnabled: false,
+            } );
+
+            textGeo2.center();
+            
+            let textMaterialHeader2 = new THREE.MeshPhongMaterial( { color: 0xffffff } );
+            let mText2 = new THREE.Line( textGeo2, textMaterialHeader2 );
+            mText2.position.set( 0, -100, 0 );
+            textgroup.add(mText2);            
+            
+            scene.add( textgroup );
+        } );
+
+        // グリッドライン
+        const gridgeometry = new THREE.BufferGeometry().setFromPoints([new THREE.Vector3(50, 50, 50)]);
+        const line = new THREE.Line(gridgeometry, new THREE.LineBasicMaterial());
+        scene.add(line);
+
+        let targetMesh = new THREE.Mesh();
+
+        tick();
+
+        // 毎フレーム時に実行されるループイベントです
+        function tick() {
+
+          // アニメーション
+          scene.rotation.z += 0.0001;
+
+          // ワールド座標を取得
+          const world = targetMesh.getWorldPosition(new THREE.Vector3());
+
+          // ラインを更新
+          // const positions = line.geometry.attributes.position.array;
+          // positions[0] = 0; // 1番目頂点のX座標
+          // positions[1] = 0; // 1番目頂点のY座標
+          // positions[2] = 0; // 1番目頂点のZ座標
+          // positions[3] = world.x; // 2番目頂点のX座標
+          // positions[4] = world.y; // 2番目頂点のY座標
+          // positions[5] = world.z; // 2番目頂点のZ座標
+          // line.geometry.attributes.position.needsUpdate = true;
+
+          // レンダリング
+          stats.begin();
+          renderer.render(scene, camera);
+
+          stats.end();
+          requestAnimationFrame(tick);
+        }
+        // リサイズイベント発生時に実行
+        window.addEventListener('resize', onResize);
+
+        // 初期化のために実行
+        onResize();
+
+        function onResize() {
+          // レンダラーのサイズを調整する
+          renderer.setPixelRatio(window.devicePixelRatio);
+          renderer.setSize(width, height);
+
+          // カメラのアスペクト比を正す
+          camera.aspect = width / height;
+          camera.updateProjectionMatrix();
+        }
+      }
+    </script>
+  </head>
+  <body>
+    <canvas id="myCanvas"></canvas>
+  </body>
+</html>
